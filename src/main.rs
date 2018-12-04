@@ -15,7 +15,7 @@ mod aoc_2018 {
                 freq += change;
             }
 
-            println!("part1: {}", freq);
+            println!("day1 part1: {}", freq);
             Ok(())
         }
 
@@ -32,7 +32,7 @@ mod aoc_2018 {
                 }
             }
 
-            println!("part2: {}", freq);
+            println!("day1 part2: {}", freq);
             Ok(())
         }
 
@@ -121,7 +121,7 @@ fn main() -> Result<()> {
     let args: Vec<String> = env::args().collect();
 
     if args.len() != 3 {
-        println!("EG:\n$ aoc 2018 day1 < input/2018/day1")
+        println!("EG:\n  $ aoc 2018 day1 < input/2018/day1");
     } else {
         let mut input = String::new();
         io::stdin().read_to_string(&mut input)?;
