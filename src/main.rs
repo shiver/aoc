@@ -2,6 +2,8 @@ use std::collections::{HashMap, HashSet};
 use std::env;
 use std::io::{self, Read};
 
+use regex::Regex;
+
 type Result<T> = ::std::result::Result<T, Box<::std::error::Error>>;
 
 mod aoc_2018 {
@@ -92,7 +94,45 @@ mod aoc_2018 {
     }
 
     pub fn day3(input: &str) -> Result<()> {
+        #[derive(Debug)]
+        struct Plot {
+            owner: u16,
+            x: u16,
+            y: u16,
+            width: u16,
+            height: u16,
+        };
+
         fn part1(input: &str) -> Result<()> {
+            let re = Regex::new(
+                r"#(?P<owner>\d+)\s@\s(?P<x>\d+),(?P<y>\d+):\s(?P<width>\d+)x(?P<height>\d+)",
+            )?;
+
+            let mut grid: HashMap<(u16, u16), u8> = HashMap::new();
+
+            for line in input.lines() {
+                let captures = re.captures(&line).expect("No matches");
+                let plot = Plot {
+                    owner: captures["owner"].parse()?,
+                    x: captures["x"].parse()?,
+                    y: captures["y"].parse()?,
+                    width: captures["width"].parse()?,
+                    height: captures["height"].parse()?,
+                };
+
+                // println!("{:#?}", plot);
+                for y in plot.y..(plot.y + plot.height) {
+                    for x in plot.x..(plot.x + plot.width) {
+                        let count = grid.entry((x, y)).or_insert(0);
+                        *count += 1;
+                    }
+                }
+                // println!("{:#?}", grid);
+            }
+
+            let res: Vec<&u8> = grid.values().filter(|&v| *v >= 2).collect();
+            println!("day3 part1: {}", res.len());
+
             Ok(())
         }
 
@@ -114,7 +154,10 @@ fn pick_day(year: &str, day: &str) -> Result<fn(&str) -> Result<()>> {
         }
     }
 
-    Err(Box::new(Error::new(ErrorKind::Other, "Unknown year/day combination!")))
+    Err(Box::new(Error::new(
+        ErrorKind::Other,
+        "Unknown year/day combination!",
+    )))
 }
 
 fn main() -> Result<()> {
