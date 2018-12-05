@@ -120,14 +120,12 @@ mod aoc_2018 {
                     height: captures["height"].parse()?,
                 };
 
-                // println!("{:#?}", plot);
                 for y in plot.y..(plot.y + plot.height) {
                     for x in plot.x..(plot.x + plot.width) {
                         let count = grid.entry((x, y)).or_insert(0);
                         *count += 1;
                     }
                 }
-                // println!("{:#?}", grid);
             }
 
             let res: Vec<&u8> = grid.values().filter(|&v| *v >= 2).collect();
