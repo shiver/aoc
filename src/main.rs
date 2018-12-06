@@ -1,10 +1,12 @@
 use std::collections::{HashMap, HashSet};
 use std::env;
+use std::error::Error;
 use std::io::{self, Read};
 
+use lazy_static::lazy_static;
 use regex::Regex;
 
-type Result<T> = ::std::result::Result<T, Box<::std::error::Error>>;
+type Result<T> = ::std::result::Result<T, Box<Error>>;
 
 mod aoc_2018 {
     use super::*;
@@ -100,25 +102,30 @@ mod aoc_2018 {
             x: u16,
             y: u16,
             width: u16,
-            height: u16,
+            height: u16
         };
 
-        fn part1(input: &str) -> Result<()> {
-            let re = Regex::new(
-                r"#(?P<owner>\d+)\s@\s(?P<x>\d+),(?P<y>\d+):\s(?P<width>\d+)x(?P<height>\d+)",
-            )?;
+        fn build_grid(input: &str) -> Result<(HashMap<(u16, u16), u8>, Vec<Plot>)> {
+            lazy_static! {
+                static ref RE: Regex = Regex::new(
+                    r"#(?P<owner>\d+)\s@\s(?P<x>\d+),(?P<y>\d+):\s(?P<width>\d+)x(?P<height>\d+)"
+                )
+                .unwrap();
+            }
 
-            let mut grid: HashMap<(u16, u16), u8> = HashMap::new();
+            let mut grid = HashMap::new();
+            let mut plots: Vec<Plot> = Vec::new();
 
             for line in input.lines() {
-                let captures = re.captures(&line).expect("No matches");
+                let captures = RE.captures(&line).expect("No matches");
                 let plot = Plot {
                     owner: captures["owner"].parse()?,
                     x: captures["x"].parse()?,
                     y: captures["y"].parse()?,
                     width: captures["width"].parse()?,
-                    height: captures["height"].parse()?,
+                    height: captures["height"].parse()?
                 };
+
 
                 for y in plot.y..(plot.y + plot.height) {
                     for x in plot.x..(plot.x + plot.width) {
@@ -126,15 +133,42 @@ mod aoc_2018 {
                         *count += 1;
                     }
                 }
+
+                plots.push(plot);
             }
 
-            let res: Vec<&u8> = grid.values().filter(|&v| *v >= 2).collect();
-            println!("day3 part1: {}", res.len());
+            Ok((grid, plots))
+        }
 
+        fn part1(input: &str) -> Result<()> {
+            let (grid, _) = build_grid(&input).expect("Failed build grid!");
+            let res: Vec<&u8> = grid.values().filter(|&&v| v >= 2).collect();
+            println!("day3 part1: {}", res.len());
+            Ok(())
+        }
+
+        fn part2(input: &str) -> Result<()> {
+            let (grid, plots) = build_grid(&input).expect("Failed build grid!");
+            for plot in plots {
+                let mut collision = false;
+                for y in plot.y..(plot.y + plot.height) {
+                    for x in plot.x..(plot.x + plot.width) {
+                       if grid[&(x, y)] > 1{
+                            collision = true;
+                       }
+                    }
+                }
+
+                if !collision {
+                    println!("day3 part2: {:#?}", plot.owner);
+                    break;
+                }
+            }
             Ok(())
         }
 
         part1(&input)?;
+        part2(&input)?;
         Ok(())
     }
 }
