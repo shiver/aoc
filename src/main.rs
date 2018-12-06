@@ -122,7 +122,7 @@ mod aoc_2018 {
 
                 for y in plot.y..(plot.y + plot.height) {
                     for x in plot.x..(plot.x + plot.width) {
-                        let count = grid.entry((x, y)).or_insert(0);
+                        let count = grid.entry((x, y)).or_default();
                         *count += 1;
                     }
                 }
